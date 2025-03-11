@@ -1,0 +1,236 @@
+swagger: '2.0'
+info:
+  title: Solution Zip Operations Connector
+  description: >-
+    This connector provides utilities for working with JSON objects, text, and documents.
+  version: '1.2'
+host: api.connector
+basePath: /technicalDocumentationSolution
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /ExtractKeysFromJson:
+    post:
+      summary: Extract keys from a JSON object
+      description: Extracts a list of keys from a specified main key in a JSON object.
+      operationId: ExtractKeysFromJson
+      x-ms-visibility: important
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              MainKey:
+                type: string
+                description: MainKey
+              Json:
+                type: object
+                properties: {}
+                description: Json
+      responses:
+        default:
+          description: A list of keys from the specified main key.
+          schema:
+            type: array
+            items:
+              type: string
+              description: The key name.
+  /TextWordReplacer:
+    post:
+      summary: Replace words in text
+      description: >-
+        Replace specific words in the provided text with given replacements,
+        optionally using regex and interpreting escape sequences.
+      operationId: TextWordReplacer
+      x-ms-visibility: important
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              Replacements:
+                type: array
+                description: List of words to replace and their replacements.
+                items:
+                  type: object
+                  properties:
+                    SearchWord:
+                      type: string
+                      description: The word or regex to search for.
+                    UseRegex:
+                      type: boolean
+                      description: >-
+                        Whether to treat `SearchWord` as a regex pattern.
+                        Default is false.
+                      default: false
+                    ReplacementWord:
+                      type: string
+                      description: The word to replace it with.
+                    InterpretEscapes:
+                      type: boolean
+                      description: >-
+                        Whether to interpret escape sequences (e.g., `\\t`,
+                        `\\n`) in `ReplacementWord`. Default is false.
+                      default: false
+              TextToParse:
+                type: string
+                description: The text in which replacements will occur.
+              IgnoreCase:
+                type: boolean
+                description: Whether the replacements should ignore case.
+                enum:
+                  - true
+                  - false
+      responses:
+        default:
+          description: The modified text.
+          schema:
+            type: string
+            description: Text after replacements.
+  /GenerateDocxXml:
+    post:
+      summary: Generate document.xml for a .docx file
+      description: >-
+        Generate the `document.xml` content for a .docx file based on the
+        provided JSON input.
+      operationId: GenerateDocxXml
+      x-ms-visibility: important
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              h1MainTitle:
+                type: string
+                description: The main title of the document (H1).
+              h2MainParagraph:
+                type: string
+                description: The main paragraph of the document (H2).
+              repeatingSection:
+                type: array
+                description: List of repeating sections in the document.
+                items:
+                  type: object
+                  properties:
+                    h2SubsectionTitle:
+                      type: string
+                      description: Title of the subsection (H2).
+                    h2SubsectionParagraph:
+                      type: string
+                      description: Paragraph in the subsection.
+                    bulletPoints:
+                      type: array
+                      description: List of bullet points.
+                      items:
+                        type: string
+                    table:
+                      type: object
+                      description: Table data for the subsection.
+                      properties:
+                        column1:
+                          type: string
+                          description: Header of column 1.
+                        column2:
+                          type: string
+                          description: Header of column 2.
+                        column3:
+                          type: string
+                          description: Header of column 3.
+                        rows:
+                          type: array
+                          description: Rows of the table.
+                          items:
+                            type: object
+                            properties:
+                              column1:
+                                type: string
+                                description: Data for column 1.
+                              column2:
+                                type: string
+                                description: Data for column 2.
+                              column3:
+                                type: string
+                                description: Data for column 3.
+                    links:
+                      type: array
+                      description: List of links.
+                      items:
+                        type: object
+                        properties:
+                          linkText:
+                            type: string
+                            description: Text of the link.
+                          linkUrl:
+                            type: string
+                            description: URL of the link.
+              generatedDate:
+                type: string
+                description: The date when the document was generated.
+      responses:
+        default:
+          description: The `document.xml` content.
+          schema:
+            type: string
+            description: The generated XML.
+  /ListZipContents:
+    post:
+      summary: List files in a ZIP archive
+      description: >-
+        Extracts and lists the contents of a provided ZIP archive, optionally
+        filtering files by type.
+      operationId: ListZipContents
+      x-ms-visibility: important
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              zipContentBytes:
+                type: string
+                description: Base64-encoded content of the ZIP file.
+              fileType:
+                type: string
+                description: >-
+                  Optional file type to filter the response (e.g., docx, xlsx).
+                  Leave blank to include all files.
+      responses:
+        default:
+          description: A list of files in the ZIP archive.
+          schema:
+            type: object
+            properties:
+              files:
+                type: array
+                description: List of files in the ZIP archive.
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the file.
+                    fullName:
+                      type: string
+                      description: Full path of the file in the ZIP archive.
+                    contentBytes:
+                      type: string
+                      description: Base64-encoded content of the file.
+              totalFileCount:
+                type: integer
+                format: int32
+                description: Total number of files in the ZIP archive.
+              fileTypeFilter:
+                type: string
+                description: The file type used for filtering.
+securityDefinitions: {}
