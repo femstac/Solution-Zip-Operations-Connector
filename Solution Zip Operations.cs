@@ -219,7 +219,7 @@ public class Script : ScriptBase
         return response;
     }
 
-    private async Task<HttpResponseMessage> HandleExtractKeysFromJson()
+        private async Task<HttpResponseMessage> HandleExtractKeysFromJson()
     {
         // Parse input JSON
         var contentAsString = await this.Context.Request.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -238,7 +238,18 @@ public class Script : ScriptBase
             };
         }
 
-        // Recursively search for the main key
+        // Special case for "$Root" to return root level keys
+        if (mainKey == "$Root")
+        {
+            var keys = new JArray(json.Properties().Select(p => p.Name));
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(keys.ToString(), Encoding.UTF8, "application/json")
+            };
+            return response;
+        }
+
+        // Recursively search for the main key (original behavior)
         JToken foundToken = FindKeyRecursive(json, mainKey);
 
         if (foundToken != null && foundToken is JObject mainKeyObject)
@@ -259,6 +270,7 @@ public class Script : ScriptBase
             };
         }
     }
+
 
     // Helper function to recursively find a key in a nested JSON object
     private JToken FindKeyRecursive(JObject json, string key)
